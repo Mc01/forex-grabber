@@ -74,7 +74,45 @@ class GrabAndSave(Resource):
         else:
             currency_rate = convert_to_rounded_decimal(currency_rate)
 
-        final_amount = convert_to_rounded_decimal(currency_rate * amount_requested)
+        """
+        Note: I believe there's an error in task description:
+        
+        1)
+        > Multiply the price for the amount passed in the POST request body and 
+        > obtain a final amount
+        
+        2)
+        > Store in MySQL the currency, the amount requested, the price given by 
+        > open exchange rate and the final amount in USD
+        
+        3)
+        > Use a precision of 8 decimal digits, and always round up
+        
+        To above for working correctly I should change base in API request
+        to desired currency and retrieve (request_currency:USD) rate...
+        
+        However free API raises following:
+        > Changing the API `base` currency is available for Developer, Enterprise 
+        > and Unlimited plan clients. Please upgrade, or contact 
+        > support@openexchangerates.org with any questions
+        
+        So to receive correct final_amount I decided to *divide* instead of multiply!
+        
+        To be compliant with description as much as possible I decided to always 
+        follow rounding up :)
+        
+        Example:
+        
+        For following request: {"currency": "PLN", "amount": "100"}
+        I understand it as: 
+        - how much in USD is worth 100 PLN?
+        
+        It gives following response: {"currency_rate": 3.78809000, "final_amount": 26.39852802}
+        Which translates to:
+        - 1 USD is worth 3.78809000 PLN
+        - so 100 PLN is worth 26.39852802 USD
+        """
+        final_amount = convert_to_rounded_decimal(amount_requested / currency_rate)
         return {
             'currency_code': currency_code,
             'currency_rate': currency_rate,
