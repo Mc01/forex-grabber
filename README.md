@@ -9,6 +9,16 @@ Build and run app with command:
 docker-compose up -d
 ```
 
+Create database
+```
+docker-compose exec app flask create-db
+```
+
+Apply migrations
+```
+docker-compose exec app flask db upgrade
+```
+
 ## Run tests
 
 Start tests with command:
