@@ -103,7 +103,7 @@ class GrabAndSave(Resource):
         
         Example:
         
-        For following request: {"currency": "PLN", "amount": "100"}
+        For following request: {"currency": "PLN", "amount": 100}
         I understand it as: 
         - how much in USD is worth 100 PLN?
         
