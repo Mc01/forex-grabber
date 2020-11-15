@@ -52,6 +52,8 @@ Following endpoints are available:
 - method: POST
 - required argument: currency
 - required argument: amount
+- request examples:
+> curl -X POST -H "Content-Type: application/json" --data '{"currency":"PLN","amount":378.81}' "http://localhost:5000/grab_and_save"
 ```
 
 ```
