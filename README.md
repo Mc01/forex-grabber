@@ -77,3 +77,5 @@ Please check `final_amount` calculation notes in `GrabAndSave` resources in `res
 - add pagination
 - remove `/last` endpoint `number` limit
 - add ordering index on `created_at` that works under MySQL
+- introduce poetry instead of pip
+- add connexion for automatic documentation
