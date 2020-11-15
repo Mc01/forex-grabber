@@ -1,5 +1,3 @@
-import os
-
 from decimal import Decimal
 
 from flask import Response, current_app, make_response
