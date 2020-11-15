@@ -4,6 +4,11 @@ Apps that grab latest forex prices from OpenExchangeRates API
 
 ## Setup
 
+Fill secrets
+```
+cp .secret.sample .secret && nano .secret
+```
+
 Build and run app with command:
 ```
 docker-compose up -d
