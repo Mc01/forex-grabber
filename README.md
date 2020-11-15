@@ -48,3 +48,7 @@ Following endpoints are available:
 - optional argument: currency
 - optional argument: number
 ```
+
+## Note
+
+Please check `final_amount` calculation notes in `GrabAndSave` resources in `resources.py`
