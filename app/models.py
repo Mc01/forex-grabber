@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from app.const import CURRENCY_ISO_LENGTH, DECIMAL_EXPONENT, DECIMAL_PRECISION
-from main import db
+from app.db import db
 
 
 class Ticker(db.Model):

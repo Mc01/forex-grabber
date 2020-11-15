@@ -74,6 +74,7 @@ Please check `final_amount` calculation notes in `GrabAndSave` resources in `res
 
 ## Potential TODOs
 
+- add more test coverage
 - add pagination
 - remove `/last` endpoint `number` limit
 - add ordering index on `created_at` that works under MySQL

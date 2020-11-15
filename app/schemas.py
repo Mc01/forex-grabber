@@ -6,13 +6,13 @@ from marshmallow import ValidationError, fields
 from marshmallow_sqlalchemy import auto_field
 
 from app.const import CURRENCY_ISO_LENGTH, DECIMAL_EXPONENT, DECIMAL_PRECISION
+from app.db import ma
 from app.models import Ticker
 from app.validation import (
     valid_currency_iso_format,
     valid_decimal_exponent,
     valid_decimal_precision,
 )
-from main import ma
 
 
 def validate_currency(value: str):
