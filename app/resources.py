@@ -19,12 +19,12 @@ def json_response(data) -> Response:
     return response
 
 
-def currency_type(value):
+def currency_type(value: str) -> str:
     assert valid_currency_iso_format(value)
     return value
 
 
-def decimal_type(value):
+def decimal_type(value: str) -> Decimal:
     decimal_value = Decimal(value)
     assert valid_decimal_exponent(decimal_value) and valid_decimal_precision(decimal_value)
     return decimal_value
