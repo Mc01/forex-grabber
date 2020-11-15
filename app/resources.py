@@ -18,6 +18,11 @@ def json_response(data) -> Response:
     return response
 
 
+def currency_type(value):
+    assert len(value) == 3
+    return value
+
+
 def decimal_type(value):
     return Decimal(value)
 
@@ -26,12 +31,12 @@ class GrabAndSave(Resource):
     schema: Schema = TickerSchema()
     parser = reqparse.RequestParser()
     parser.add_argument(
-        'currency', type=str, required=True,
-        help='Missing "currency" argument! Example: "BTC"',
+        'currency', type=currency_type, required=True,
+        help='Missing currency argument in correct format! Example: BTC',
     )
     parser.add_argument(
         'amount', type=decimal_type, required=True,
-        help='Missing "amount" argument! Example: "16105.10"',
+        help='Missing amount argument in correct format! Example: 16105.10',
     )
 
     def post(self):
@@ -66,7 +71,7 @@ class GrabAndSave(Resource):
 class Last(Resource):
     schema: Schema = TickerSchema(many=True)
     parser = reqparse.RequestParser()
-    parser.add_argument('currency', type=str)
+    parser.add_argument('currency', type=currency_type)
     parser.add_argument('number', type=int, default=1)
 
     def get(self):
