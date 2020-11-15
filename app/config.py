@@ -31,10 +31,11 @@ class BaseConfig:
         port=MYSQL_PORT,
         db=MYSQL_DATABASE,
     )
+    OER_APP_ID = os.getenv('OER_APP_ID')
 
 
 class DevConfig(BaseConfig):
     FLASK_ENV = 'development'
-    DEBUG = True
+    FLASK_DEBUG = True
     TESTING = True
     SQLALCHEMY_TRACK_MODIFICATIONS = False

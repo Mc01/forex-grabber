@@ -7,4 +7,5 @@ Flask-Migrate==2.5.3
 flask-marshmallow==0.14.0
 marshmallow-sqlalchemy==0.24.0
 simplejson==3.17.2
+requests==2.25.0
 pytest==6.1.2

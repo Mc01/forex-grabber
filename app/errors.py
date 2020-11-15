@@ -1,13 +1,37 @@
 from werkzeug.exceptions import HTTPException
 
 
-class InvalidInputArgumentFormat(HTTPException):
+class CommunicationIssueWithOER(HTTPException):
+    pass
+
+
+class MalformedDataReturned(HTTPException):
+    pass
+
+
+class NoRateAvailableForCurrency(HTTPException):
+    pass
+
+
+class DataValidationDuringSaveException(HTTPException):
     pass
 
 
 errors = {
-    InvalidInputArgumentFormat.__name__: {
-         "message": "Input fields have invalid format",
-         "status": 400,
-     },
+    CommunicationIssueWithOER.__name__: {
+        "message": "Communication cannot be established with OER",
+        "status": 500,
+    },
+    MalformedDataReturned.__name__: {
+        "message": "Malformed data returned by OER",
+        "status": 500,
+    },
+    NoRateAvailableForCurrency.__name__: {
+        "message": "There is no currency rate on OER for given currency code",
+        "status": 400,
+    },
+    DataValidationDuringSaveException.__name__: {
+        "message": "Data was not able to pass validation during serialization",
+        "status": 500,
+    },
 }

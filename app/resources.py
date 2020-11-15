@@ -1,16 +1,28 @@
-from decimal import Decimal, setcontext, Context, ROUND_UP
+from decimal import Decimal
 
-from flask import make_response, Response
+from flask import make_response, Response, current_app
 from flask_marshmallow import Schema
 from flask_restful import Resource, reqparse
 from flask_sqlalchemy import BaseQuery
 from marshmallow import ValidationError
+from requests import HTTPError
 
 from app.db import db
-from app.errors import InvalidInputArgumentFormat
+from app.errors import (
+    DataValidationDuringSaveException,
+    NoRateAvailableForCurrency,
+    CommunicationIssueWithOER,
+    MalformedDataReturned,
+)
 from app.models import Ticker
 from app.schemas import TickerSchema
-from app.validation import valid_currency_iso_format, valid_decimal_exponent, valid_decimal_precision
+from app.utils import convert_to_raw_decimal, convert_to_rounded_decimal
+from app.validation import (
+    valid_currency_iso_format,
+    valid_decimal_exponent,
+    valid_decimal_precision,
+)
+from app.vendors import oer
 
 
 def json_response(data) -> Response:
@@ -25,7 +37,7 @@ def currency_type(value: str) -> str:
 
 
 def decimal_type(value: str) -> Decimal:
-    decimal_value = Decimal(value)
+    decimal_value = convert_to_raw_decimal(value)
     assert valid_decimal_exponent(decimal_value) and valid_decimal_precision(decimal_value)
     return decimal_value
 
@@ -42,31 +54,46 @@ class GrabAndSave(Resource):
         help='Missing amount argument in correct format! Example: 16105.10',
     )
 
-    def post(self):
-        args = self.parser.parse_args()
-        currency_code = args['currency']
-        amount_requested = args['amount']
+    @staticmethod
+    def _get_data_from_oer(currency_code, amount_requested: Decimal):
+        try:
+            raw_data = oer.get_latest_rates(
+                app_id=current_app.config['OER_APP_ID'],
+            )
+        except HTTPError as e:
+            current_app.logger.error(f'Exception: {e}')
+            raise CommunicationIssueWithOER
 
-        currency_rate = Decimal('0.000062')
+        try:
+            currency_rate = raw_data['rates'].get(currency_code)
+        except KeyError:
+            raise MalformedDataReturned
 
-        setcontext(Context(prec=8, rounding=ROUND_UP))
-        final_amount = currency_rate * amount_requested
+        if not currency_rate:
+            raise NoRateAvailableForCurrency
+        else:
+            currency_rate = convert_to_rounded_decimal(currency_rate)
 
-        payload = {
+        final_amount = convert_to_rounded_decimal(currency_rate * amount_requested)
+        return {
             'currency_code': currency_code,
             'currency_rate': currency_rate,
             'amount_requested': amount_requested,
             'final_amount': final_amount,
         }
+
+    def post(self):
+        args = self.parser.parse_args()
+        data = self._get_data_from_oer(
+            currency_code=args['currency'],
+            amount_requested=args['amount'],
+        )
+
         try:
-            validated_data = self.schema.load(data=payload)
+            validated_data = self.schema.load(data=data)
         except ValidationError as e:
-            from main import app
-            app.logger.error(
-                f'Exception: {e} '
-                f'Payload: {payload}'
-            )
-            raise InvalidInputArgumentFormat
+            current_app.logger.error(f'Exception: {e}')
+            raise DataValidationDuringSaveException
 
         ticker = Ticker(**validated_data)
         db.session.add(ticker)
