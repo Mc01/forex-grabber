@@ -71,3 +71,9 @@ Following endpoints are available:
 ## Note
 
 Please check `final_amount` calculation notes in `GrabAndSave` resources in `resources.py`
+
+## Potential TODOs
+
+- add pagination
+- remove `/last` endpoint `number` limit
+- add ordering index on `created_at` that works under MySQL
