@@ -10,6 +10,7 @@ from app.db import db
 from app.errors import InvalidInputArgumentFormat
 from app.models import Ticker
 from app.schemas import TickerSchema
+from app.validation import valid_currency_iso_format, valid_decimal_exponent, valid_decimal_precision
 
 
 def json_response(data) -> Response:
@@ -19,12 +20,14 @@ def json_response(data) -> Response:
 
 
 def currency_type(value):
-    assert len(value) == 3
+    assert valid_currency_iso_format(value)
     return value
 
 
 def decimal_type(value):
-    return Decimal(value)
+    decimal_value = Decimal(value)
+    assert valid_decimal_exponent(decimal_value) and valid_decimal_precision(decimal_value)
+    return decimal_value
 
 
 class GrabAndSave(Resource):
@@ -44,21 +47,25 @@ class GrabAndSave(Resource):
         currency_code = args['currency']
         amount_requested = args['amount']
 
-        currency_code = 'BTC'
         currency_rate = Decimal('0.000062')
-        amount_requested = Decimal('16105.10')
 
         setcontext(Context(prec=8, rounding=ROUND_UP))
         final_amount = currency_rate * amount_requested
 
+        payload = {
+            'currency_code': currency_code,
+            'currency_rate': currency_rate,
+            'amount_requested': amount_requested,
+            'final_amount': final_amount,
+        }
         try:
-            validated_data = self.schema.load(data={
-                'currency_code': currency_code,
-                'currency_rate': currency_rate,
-                'amount_requested': amount_requested,
-                'final_amount': final_amount,
-            })
-        except ValidationError:
+            validated_data = self.schema.load(data=payload)
+        except ValidationError as e:
+            from main import app
+            app.logger.error(
+                f'Exception: {e} '
+                f'Payload: {payload}'
+            )
             raise InvalidInputArgumentFormat
 
         ticker = Ticker(**validated_data)
