@@ -22,6 +22,7 @@ from app.validation import (
     valid_currency_iso_format,
     valid_decimal_exponent,
     valid_decimal_precision,
+    valid_number_limit,
 )
 from app.vendors import oer
 
@@ -33,8 +34,9 @@ def json_response(data) -> Response:
 
 
 def currency_type(value: str) -> str:
-    assert valid_currency_iso_format(value)
-    return value
+    str_value = str(value)
+    assert valid_currency_iso_format(str_value)
+    return str_value
 
 
 def decimal_type(value: str) -> Decimal:
@@ -43,6 +45,12 @@ def decimal_type(value: str) -> Decimal:
         decimal_value
     )
     return decimal_value
+
+
+def number_type(value: str) -> int:
+    int_value = int(value)
+    assert valid_number_limit(int_value)
+    return int_value
 
 
 class GrabAndSave(Resource):
@@ -150,8 +158,17 @@ class GrabAndSave(Resource):
 class Last(Resource):
     schema: Schema = TickerSchema(many=True)
     parser = reqparse.RequestParser()
-    parser.add_argument("currency", type=currency_type)
-    parser.add_argument("number", type=int, default=1)
+    parser.add_argument(
+        "currency",
+        type=currency_type,
+        help="Currency argument not in correct format! Example: BTC",
+    )
+    parser.add_argument(
+        "number",
+        type=number_type,
+        default=1,
+        help="Number of currency tickers should be greater than 0 and not greater than limit!",
+    )
 
     def get(self):
         args = self.parser.parse_args()

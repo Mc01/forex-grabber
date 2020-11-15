@@ -59,6 +59,11 @@ Following endpoints are available:
 - method: GET
 - optional argument: currency
 - optional argument: number
+- request examples:
+> curl -X GET "http://localhost:5000/last"
+> curl -X GET "http://localhost:5000/last?currency=AED"
+> curl -X GET "http://localhost:5000/last?number=3"
+> curl -X GET "http://localhost:5000/last?currency=AED&number=3"
 ```
 
 ## Note
