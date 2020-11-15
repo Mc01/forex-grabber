@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-from app.const import DECIMAL_EXPONENT, DECIMAL_PRECISION, CURRENCY_ISO_LENGTH
+from app.const import CURRENCY_ISO_LENGTH, DECIMAL_EXPONENT, DECIMAL_PRECISION
 
 
 def valid_currency_iso_format(value: str) -> bool:

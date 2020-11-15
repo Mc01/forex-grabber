@@ -1,6 +1,9 @@
+import os
+
 from decimal import Decimal
 
-from flask import make_response, Response, current_app
+from flask import Response, current_app, make_response
+
 from flask_marshmallow import Schema
 from flask_restful import Resource, reqparse
 from flask_sqlalchemy import BaseQuery
@@ -9,10 +12,10 @@ from requests import HTTPError
 
 from app.db import db
 from app.errors import (
-    DataValidationDuringSaveException,
-    NoRateAvailableForCurrency,
     CommunicationIssueWithOER,
+    DataValidationDuringSaveException,
     MalformedDataReturned,
+    NoRateAvailableForCurrency,
 )
 from app.models import Ticker
 from app.schemas import TickerSchema
@@ -27,7 +30,7 @@ from app.vendors import oer
 
 def json_response(data) -> Response:
     response: Response = make_response(data)
-    response.headers['content-type'] = 'application/json'
+    response.headers["content-type"] = "application/json"
     return response
 
 
@@ -38,7 +41,9 @@ def currency_type(value: str) -> str:
 
 def decimal_type(value: str) -> Decimal:
     decimal_value = convert_to_raw_decimal(value)
-    assert valid_decimal_exponent(decimal_value) and valid_decimal_precision(decimal_value)
+    assert valid_decimal_exponent(decimal_value) and valid_decimal_precision(
+        decimal_value
+    )
     return decimal_value
 
 
@@ -46,26 +51,30 @@ class GrabAndSave(Resource):
     schema: Schema = TickerSchema()
     parser = reqparse.RequestParser()
     parser.add_argument(
-        'currency', type=currency_type, required=True,
-        help='Missing currency argument in correct format! Example: BTC',
+        "currency",
+        type=currency_type,
+        required=True,
+        help="Missing currency argument in correct format! Example: BTC",
     )
     parser.add_argument(
-        'amount', type=decimal_type, required=True,
-        help='Missing amount argument in correct format! Example: 16105.10',
+        "amount",
+        type=decimal_type,
+        required=True,
+        help="Missing amount argument in correct format! Example: 16105.10",
     )
 
     @staticmethod
     def _get_data_from_oer(currency_code, amount_requested: Decimal):
         try:
             raw_data = oer.get_latest_rates(
-                app_id=current_app.config['OER_APP_ID'],
+                app_id=current_app.config["OER_APP_ID"],
             )
         except HTTPError as e:
-            current_app.logger.error(f'Exception: {e}')
+            current_app.logger.error(f"Exception: {e}")
             raise CommunicationIssueWithOER
 
         try:
-            currency_rate = raw_data['rates'].get(currency_code)
+            currency_rate = raw_data["rates"].get(currency_code)
         except KeyError:
             raise MalformedDataReturned
 
@@ -114,23 +123,23 @@ class GrabAndSave(Resource):
         """
         final_amount = convert_to_rounded_decimal(amount_requested / currency_rate)
         return {
-            'currency_code': currency_code,
-            'currency_rate': currency_rate,
-            'amount_requested': amount_requested,
-            'final_amount': final_amount,
+            "currency_code": currency_code,
+            "currency_rate": currency_rate,
+            "amount_requested": amount_requested,
+            "final_amount": final_amount,
         }
 
     def post(self):
         args = self.parser.parse_args()
         data = self._get_data_from_oer(
-            currency_code=args['currency'],
-            amount_requested=args['amount'],
+            currency_code=args["currency"],
+            amount_requested=args["amount"],
         )
 
         try:
             validated_data = self.schema.load(data=data)
         except ValidationError as e:
-            current_app.logger.error(f'Exception: {e}')
+            current_app.logger.error(f"Exception: {e}")
             raise DataValidationDuringSaveException
 
         ticker = Ticker(**validated_data)
@@ -143,14 +152,14 @@ class GrabAndSave(Resource):
 class Last(Resource):
     schema: Schema = TickerSchema(many=True)
     parser = reqparse.RequestParser()
-    parser.add_argument('currency', type=currency_type)
-    parser.add_argument('number', type=int, default=1)
+    parser.add_argument("currency", type=currency_type)
+    parser.add_argument("number", type=int, default=1)
 
     def get(self):
         args = self.parser.parse_args()
 
-        currency = args.get('currency')
-        number = args.get('number')
+        currency = args.get("currency")
+        number = args.get("number")
 
         query_obj: BaseQuery = Ticker.query
         query = query_obj.order_by(Ticker.created_at.desc())

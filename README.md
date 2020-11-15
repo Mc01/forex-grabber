@@ -24,6 +24,18 @@ Apply migrations
 docker-compose exec app flask db upgrade
 ```
 
+## Formatters
+
+Black
+```
+docker-compose exec app black .
+```
+
+iSort
+```
+docker-compose exec app isort --atomic .
+```
+
 ## Run tests
 
 Start tests with command:

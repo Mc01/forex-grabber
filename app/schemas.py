@@ -1,29 +1,40 @@
 from decimal import Decimal
 
-from marshmallow import ValidationError, fields
-from marshmallow_sqlalchemy import auto_field
 import simplejson
 
-from app.const import DECIMAL_EXPONENT, DECIMAL_PRECISION, CURRENCY_ISO_LENGTH
+from marshmallow import ValidationError, fields
+from marshmallow_sqlalchemy import auto_field
+
+from app.const import CURRENCY_ISO_LENGTH, DECIMAL_EXPONENT, DECIMAL_PRECISION
 from app.models import Ticker
-from app.validation import valid_decimal_exponent, valid_decimal_precision, valid_currency_iso_format
+from app.validation import (
+    valid_currency_iso_format,
+    valid_decimal_exponent,
+    valid_decimal_precision,
+)
 from main import ma
 
 
 def validate_currency(value: str):
     if not isinstance(value, str):
-        raise ValidationError(f'Value has incorrect type: {type(value)}')
+        raise ValidationError(f"Value has incorrect type: {type(value)}")
     if not valid_currency_iso_format(value):
-        raise ValidationError(f'Value must be in ISO format with {CURRENCY_ISO_LENGTH} length')
+        raise ValidationError(
+            f"Value must be in ISO format with {CURRENCY_ISO_LENGTH} length"
+        )
 
 
 def validate_decimal(value: Decimal):
     if not isinstance(value, Decimal):
-        raise ValidationError(f'Value has incorrect type: {type(value)}')
+        raise ValidationError(f"Value has incorrect type: {type(value)}")
     if not valid_decimal_exponent(value):
-        raise ValidationError(f'Exponent must be not greater than {DECIMAL_EXPONENT} places')
+        raise ValidationError(
+            f"Exponent must be not greater than {DECIMAL_EXPONENT} places"
+        )
     if not valid_decimal_precision(value):
-        raise ValidationError(f'Precision must be not greater than {DECIMAL_PRECISION} places')
+        raise ValidationError(
+            f"Precision must be not greater than {DECIMAL_PRECISION} places"
+        )
 
 
 class TickerSchema(ma.SQLAlchemySchema):
