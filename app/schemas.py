@@ -40,7 +40,7 @@ def validate_decimal(value: Decimal):
 class TickerSchema(ma.SQLAlchemySchema):
     class Meta:
         model = Ticker
-        json_module = simplejson
+        render_module = simplejson
 
     currency_code = fields.String(validate=validate_currency)
     currency_rate = fields.Decimal(validate=validate_decimal)
