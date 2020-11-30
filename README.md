@@ -40,7 +40,7 @@ docker-compose exec app isort --atomic .
 
 Start tests with command:
 ```
-docker-compose run app pytest
+docker-compose -f docker-compose.test.yml run test pytest
 ```
 
 ## Endpoints

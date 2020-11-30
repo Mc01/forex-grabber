@@ -6,7 +6,12 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 load_dotenv(os.path.join(basedir, ".env"))
 
 
-def _build_uri(
+def get_config() -> str:
+    env: str = os.getenv("ENVIRONMENT")
+    return f"app.config.{env.capitalize()}Config"
+
+
+def build_db_uri(
     user: str,
     password: str,
     host: str,
@@ -23,7 +28,7 @@ class BaseConfig:
     MYSQL_DATABASE = os.getenv("MYSQL_DATABASE")
     MYSQL_USER = os.getenv("MYSQL_USER")
     MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD")
-    SQLALCHEMY_DATABASE_URI = _build_uri(
+    SQLALCHEMY_DATABASE_URI = build_db_uri(
         user=MYSQL_USER,
         password=MYSQL_PASSWORD,
         host=MYSQL_HOST,
@@ -35,6 +40,13 @@ class BaseConfig:
 
 class DevConfig(BaseConfig):
     FLASK_ENV = "development"
+    FLASK_DEBUG = True
+    TESTING = False
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+
+class TestConfig(BaseConfig):
+    FLASK_ENV = "testing"
     FLASK_DEBUG = True
     TESTING = True
     SQLALCHEMY_TRACK_MODIFICATIONS = False
